@@ -32,7 +32,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 ##Preliminaries
 
-```{r}
+
+```r
 library(ggplot2)
 library(lattice)
 # setwd("C:/Users/mjaffe/Documents/CourseraandOpenEDx/DataScience(Hopkins)/ReproducibleResearch")
@@ -46,14 +47,27 @@ Loading and preprocessing the data
 
 Also save a summary of the data (and find the number of NAs)
 
-```{r}
+
+```r
 activitydata <- read.csv("activity.csv", header=TRUE)
 sumactivitystats     <- summary(activitydata)
 nbrNAs       <- is.na(activitydata$steps)
 ```
 ## Summary statistics
-```{r}
+
+```r
 sumactivitystats
+```
+
+```
+##      steps               date          interval   
+##  Min.   :  0.0   2012-10-01:  288   Min.   :   0  
+##  1st Qu.:  0.0   2012-10-02:  288   1st Qu.: 589  
+##  Median :  0.0   2012-10-03:  288   Median :1178  
+##  Mean   : 37.4   2012-10-04:  288   Mean   :1178  
+##  3rd Qu.: 12.0   2012-10-05:  288   3rd Qu.:1766  
+##  Max.   :806.0   2012-10-06:  288   Max.   :2355  
+##  NA's   :2304    (Other)   :15840
 ```
 
 ## Determine number of steps for each date and plot
@@ -67,18 +81,22 @@ What is mean total number of steps taken per day?
 
    Calculate and report the mean and median total number of steps taken per day
 
-```{r}
+
+```r
 stepsperdate <- aggregate(steps ~ date, data=activitydata, FUN=sum)
 meansperdate <- aggregate(steps ~ date, data=activitydata, function(x) mean(x, na.rm=T))  # NA's removed
 mean.original   <- mean(stepsperdate$steps)
 median.original <- median(stepsperdate$steps)
 ```
 
-```{r fig.width=7, fig.height=7}
+
+```r
 barplot(stepsperdate$steps, names.arg=stepsperdate$date, xlab="date (year-month-day)", ylab="steps")
 ```
 
-The mean and median total number of steps taken per day are `r mean.original `and  `r median.original`, respectively..
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+
+The mean and median total number of steps taken per day are 1.0766 &times; 10<sup>4</sup>and  10765, respectively..
 
 ## Average daily activity pattern
 
@@ -88,15 +106,19 @@ The mean and median total number of steps taken per day are `r mean.original `an
 
    Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r}
+
+```r
 stepsperdate.interval <- aggregate(steps ~ interval, data=activitydata, FUN=mean)
 max_interval <- stepsperdate.interval$interval[which.max(stepsperdate.interval$steps)]
 ```
-As can be seen from the plot below, the 5-minute interval(across all days in dataset), with the maximum number of steps is the `r max_interval`th interval.
+As can be seen from the plot below, the 5-minute interval(across all days in dataset), with the maximum number of steps is the 835th interval.
 
-```{r fig.width=7, fig.height=7}
+
+```r
 plot(stepsperdate.interval, type="l")
 ```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
 
 ## Impute missing values 
 
@@ -112,9 +134,10 @@ Make a histogram of the total number of steps taken each day and Calculate and r
 
 ## Strategy : Replace missing values with the  mean for day
 
-The total number of missing 5 minute interval values are `r sum(nbrNAs)`.
+The total number of missing 5 minute interval values are 2304.
 
-```{r}
+
+```r
 imputedactivitydata = activitydata
 datecntr = 1
 daymean_value = meansperdate[1]$steps
@@ -139,23 +162,28 @@ for (i in 1:sizeactivity) {
 ```
 
 
-```{r}
+
+```r
 stepsperdateimputed <- aggregate(steps ~ date, data=imputedactivitydata, FUN=sum)
 mean.imputed   <- mean(stepsperdateimputed$steps)
 median.imputed <- median(stepsperdateimputed$steps)
 ```
 
-```{r fig.width=7, fig.height=7}
+
+```r
 barplot(stepsperdateimputed$steps, names.arg=stepsperdateimputed$date, xlab="date (yr-mon-day", ylab="steps")
 ```
 
-The updated mean and median number of steps using imputed values are `r mean.imputed` and `r median.imputed `, respectively differing from the original mean and median by `r (mean.imputed-mean.original)`  and `r (median.imputed-median.original)`, respectively .   
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
 
-```{r}
+The updated mean and median number of steps using imputed values are 1.0603 &times; 10<sup>4</sup> and 1.0682 &times; 10<sup>4</sup>, respectively differing from the original mean and median by -162.6916  and -82.5, respectively .   
+
+
+```r
 percentdiff.mean  = 100.0*(mean.imputed-mean.original)/mean.original
 percentdiff.median= 100.0*(median.imputed-median.original)/median.original
 ```
-The percentage differences for the mean and median are `r percentdiff.mean`  and `r percentdiff.median`, respectively.
+The percentage differences for the mean and median are -1.5111  and -0.7664, respectively.
 
 
 ## Differences in activity patterns between weekdays and weekends?
@@ -169,7 +197,8 @@ Create a new factor variable in the dataset with two levels - "weekday" and "wee
 Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). The plot should look something like the following, which was creating using simulated data:
 
 
-```{r}
+
+```r
 imputedactivitydata$weekday = weekdays(as.Date(imputedactivitydata$date) ) 
 weekendsindicator = (imputedactivitydata$weekday == 'Saturday' | imputedactivitydata$weekday == 'Sunday') 
 imputedactivitydata$weekportion      = 'weekend'
@@ -177,11 +206,13 @@ imputedactivitydata[!weekendsindicator,]$weekportion = 'weekday'
 imputedactivitydata$weekportion = as.factor(imputedactivitydata$weekportion)
 ```
 
-```{r fig.width=7, fig.height=7}
+
+```r
 stepsweekportion = with(imputedactivitydata, aggregate(x=steps, by=list(interval, weekportion),FUN=function(x) mean(x, na.rm=T)))
 names(stepsweekportion) = c("Time", "DuringWeekportion", "StepsMean")
 xyplot(StepsMean ~ Time | DuringWeekportion, data=stepsweekportion, layout=c(1,2), type='l')
-
 ```
+
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13.png) 
 
 As can be observed from the plots (and as one might expect for the current sedentary lifestyle most live) , weekends tend (on average) to have a greater level of activity (based on the number of steps recorded). 
